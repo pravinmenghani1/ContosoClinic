@@ -1,6 +1,6 @@
 Steps for setting up this application
 
-# Maximizing Your Clinical Data's Potential: Leveraging Amazon Q's NLP on Clinic Application
+# Setting up Clinic Application
 
 This repository provides the supporting infrastructure and configuration guidelines to integrate with Amazon Q Business Web Crawler connector, as detailed in the associated AWS Blog post. It includes step-by-step instructions to help you successfully set up and configure the necessary AWS services.
 
