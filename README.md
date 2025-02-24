@@ -39,6 +39,6 @@ cd ContosoClinic
 
 ## [CloudFormation Stack Deployment](#cloudformation-stack-deployment)
 
-This step creates the core infrastructure including VPC, EC2 instance, and FSx file system. You can choose either the console or CLI method.
+This step creates the core infrastructure including EC2 instance. You can choose either the console or CLI method.
 
 ### Using AWS Management Console
