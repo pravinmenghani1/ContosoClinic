@@ -7,6 +7,14 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
 
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Select a subnet within the selected VPC
+
   InstanceType:
     Description: EC2 instance type
     Type: String
@@ -23,6 +31,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable HTTP and RDP access
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -36,15 +45,22 @@ Resources:
           FromPort: 3389
           ToPort: 3389
           CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-WebServerSG
 
   WindowsServer:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
-      SecurityGroups: 
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds: 
         - !Ref WebServerSecurityGroup
       KeyName: !Ref KeyPairName
       ImageId: '{{resolve:ssm:/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base}}'
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-WebServer
       UserData: 
         Fn::Base64: 
           !Sub |
@@ -64,7 +80,6 @@ Resources:
             </head>
             <body>
                 <h1>Welcome to IIS on Windows Server 2019</h1>
-                <p>Server Instance ID: ${WindowsServer}</p>
                 <p>Stack Name: ${AWS::StackName}</p>
             </body>
             </html>
@@ -80,3 +95,6 @@ Outputs:
   RDPConnection:
     Description: RDP connection string
     Value: !Sub ${WindowsServer.PublicDnsName}:3389
+  SecurityGroupId:
+    Description: Security Group ID
+    Value: !Ref WebServerSecurityGroup
