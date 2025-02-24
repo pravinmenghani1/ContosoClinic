@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Windows Server 2019 with IIS Web Server'
+
+Parameters:
+  KeyPairName:
+    Description: Name of an existing EC2 KeyPair to enable RDP access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t3.large
+    AllowedValues:
+      - t3.large
+      - t3.xlarge
+      - m5.large
+      - m5.xlarge
+    ConstraintDescription: Must be a valid EC2 instance type.
+
+Resources:
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP and RDP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+
+  WindowsServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      SecurityGroups: 
+        - !Ref WebServerSecurityGroup
+      KeyName: !Ref KeyPairName
+      ImageId: !Ref 'AWS::SSM::Parameter::Value:/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base'
+      UserData: 
+        Fn::Base64: !Sub |
+          <powershell>
+          # Install IIS
+          Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+
+          # Enable IIS Management Console
+          Install-WindowsFeature -Name Web-Mgmt-Console
+
+          # Create a simple welcome page
+          $html = @"
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to IIS on Windows Server 2019</title>
+          </head>
+          <body>
+              <h1>Welcome to IIS on Windows Server 2019</h1>
+              <p>Server Instance ID: ${AWS::InstanceId}</p>
+              <p>Stack Name: ${AWS::StackName}</p>
+          </body>
+          </html>
+          "@
+
+          $html | Out-File -FilePath "C:\inetpub\wwwroot\index.html" -Encoding UTF8
+          </powershell>
+
+Outputs:
+  WebsiteURL:
+    Description: URL for the website
+    Value: !Sub http://${WindowsServer.PublicDnsName}
+  RDPConnection:
+    Description: RDP connection string
+    Value: !Sub ${WindowsServer.PublicDnsName}:3389
