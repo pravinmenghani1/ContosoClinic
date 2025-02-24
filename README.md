@@ -1,1 +1,1 @@
-# ContosoClinic
+# AmazonClinic
