@@ -31,10 +31,10 @@ First, you'll need to clone the repository containing all necessary scripts and 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo-url/amazonq-connector-for-fsx-windows.git
+git clone https://github.com/pravinmenghani1/ContosoClinic.git
 
 # Navigate to the cloned directory
-cd amazonq-connector-for-fsx-windows
+cd ContosoClinic
 ```
 
 ## [CloudFormation Stack Deployment](#cloudformation-stack-deployment)
